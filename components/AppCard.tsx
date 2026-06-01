@@ -24,6 +24,7 @@ export default function AppCard({ children, style, onPress }: AppCardProps) {
     {
       backgroundColor: themeColors.surface,
       borderColor: themeColors.border,
+      shadowColor: colorScheme === 'light' ? '#0F172A' : '#000000',
     },
     style,
   ];
@@ -47,16 +48,16 @@ export default function AppCard({ children, style, onPress }: AppCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: Radius.md,
-    padding: Spacing.md,
+    borderRadius: Radius.lg, // Modern 16px corners
+    padding: Spacing.lg, // Spacious 24px internal padding
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 3,
   },
   pressed: {
     opacity: 0.9,
+    transform: [{ scale: 0.99 }],
   },
 });

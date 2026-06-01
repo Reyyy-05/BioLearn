@@ -86,19 +86,26 @@ const styles = StyleSheet.create({
   button: {
     paddingVertical: Spacing.sm + 4,
     paddingHorizontal: Spacing.lg,
-    borderRadius: Radius.md,
+    borderRadius: 12, // Cohesive modern rounded style
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 48,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   text: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: -0.1,
   },
   disabled: {
     opacity: 0.5,
   },
   pressed: {
-    opacity: 0.85,
+    opacity: 0.9,
+    transform: [{ scale: 0.96 }], // Premium touch scale-down response
   },
 });

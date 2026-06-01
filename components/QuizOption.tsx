@@ -97,10 +97,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
-    borderRadius: Radius.md,
+    borderRadius: 12, // Cohesive modern rounded style
     borderWidth: 1.5,
     gap: Spacing.md,
     minHeight: 56,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 2,
+    elevation: 1,
   },
   labelBadge: {
     width: 32,
@@ -116,10 +121,11 @@ const styles = StyleSheet.create({
   optionText: {
     flex: 1,
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '600',
     lineHeight: 20,
   },
   pressed: {
     opacity: 0.9,
+    transform: [{ scale: 0.98 }], // Interactive click scale-down
   },
 });

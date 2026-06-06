@@ -411,7 +411,7 @@ export default function ProgressScreen() {
       </View>
 
       <Text style={[styles.footerText, { color: themeColors.textSecondary }]}>
-        BioLearn Demo Checklist • Checkpoint 9
+        BioLearn Demo Checklist • Checkpoint 10 (Final MVP)
       </Text>
     </ScreenContainer>
   );

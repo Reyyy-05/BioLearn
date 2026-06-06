@@ -100,7 +100,7 @@ export default function LoginScreen() {
       </View>
 
       <Text style={[styles.footerText, { color: themeColors.textSecondary }]}>
-        BioLearn Demo Checklist • Checkpoint 4
+        BioLearn Demo Checklist • Checkpoint 10 (Final MVP)
       </Text>
     </ScreenContainer>
   );

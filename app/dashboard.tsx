@@ -21,6 +21,7 @@ export default function DashboardScreen() {
   const instructors = useLearningStore((s) => s.instructors);
   const questions = useLearningStore((s) => s.questions);
   const progress = useLearningStore((s) => s.progress);
+  const resetDemo = useLearningStore((s) => s.resetDemo);
 
   // Security check: Redirect back to Login if currentRole is null
   useEffect(() => {
@@ -376,6 +377,12 @@ export default function DashboardScreen() {
       {/* Logout / Switch Role Option */}
       <View style={styles.logoutWrapper}>
         <AppButton
+          title="🔄 Reset Progress Demo"
+          onPress={() => resetDemo()}
+          variant="ghost"
+          style={styles.logoutButton}
+        />
+        <AppButton
           title="Keluar / Ganti Peran Demo"
           onPress={handleLogout}
           variant="secondary"
@@ -384,7 +391,7 @@ export default function DashboardScreen() {
       </View>
 
       <Text style={[styles.footerText, { color: themeColors.textSecondary }]}>
-        BioLearn Demo Checklist • Checkpoint 5
+        BioLearn Demo Checklist • Checkpoint 10 (Final MVP)
       </Text>
     </ScreenContainer>
   );
@@ -593,6 +600,7 @@ const styles = StyleSheet.create({
   },
   logoutWrapper: {
     marginTop: Spacing.md,
+    gap: Spacing.sm,
   },
   logoutButton: {
     minHeight: 48,

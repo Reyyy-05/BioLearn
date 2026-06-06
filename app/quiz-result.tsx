@@ -267,7 +267,7 @@ export default function QuizResultScreen() {
       </View>
 
       <Text style={[styles.footerText, { color: themeColors.textSecondary }]}>
-        BioLearn Demo Checklist • Checkpoint 8
+        BioLearn Demo Checklist • Checkpoint 10 (Final MVP)
       </Text>
     </ScreenContainer>
   );

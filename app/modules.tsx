@@ -218,7 +218,7 @@ export default function ModulesScreen() {
       </View>
 
       <Text style={[styles.footerText, { color: themeColors.textSecondary }]}>
-        BioLearn Demo Checklist • Checkpoint 6
+        BioLearn Demo Checklist • Checkpoint 10 (Final MVP)
       </Text>
     </ScreenContainer>
   );

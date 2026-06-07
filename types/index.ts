@@ -39,6 +39,8 @@ export interface LearningModule {
 }
 
 // ─── Quiz ─────────────────────────────────────────────────────
+export type QuestionDifficulty = 'easy' | 'medium' | 'hard';
+
 export interface QuizQuestion {
   id: string;
   moduleId: string;
@@ -46,6 +48,21 @@ export interface QuizQuestion {
   options: string[];
   correctAnswerIndex: number;
   explanation: string;
+
+  // Optional metadata (additive; does not affect existing flow)
+  difficulty?: QuestionDifficulty;
+  topicTag?: string;
+  competency?: string;
+}
+
+// A question prepared for a single attempt: options are already shuffled
+// and correctAnswerIndex is remapped to the shuffled option order.
+export type ActiveQuizQuestion = QuizQuestion;
+
+// The shuffled question set for the current quiz attempt.
+export interface ActiveQuiz {
+  moduleId: string;
+  questions: ActiveQuizQuestion[];
 }
 
 export interface QuizAnswer {

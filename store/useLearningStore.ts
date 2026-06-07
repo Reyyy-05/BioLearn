@@ -7,10 +7,12 @@ import {
   LearningProgress,
   QuizAnswer,
   QuizResult,
+  ActiveQuiz,
 } from '@/types';
 import { seedInstructors } from '@/data/seedInstructors';
 import { seedModules } from '@/data/seedModules';
 import { seedQuestions } from '@/data/seedQuestions';
+import { buildActiveQuiz } from '@/utils/shuffle';
 
 // ─── State Shape ──────────────────────────────────────────────
 interface LearningState {
@@ -21,6 +23,7 @@ interface LearningState {
   progress: Record<string, LearningProgress>;
   quizAnswers: QuizAnswer[];
   lastQuizResult: QuizResult | null;
+  activeQuiz: ActiveQuiz | null;
 }
 
 // ─── Actions ──────────────────────────────────────────────────
@@ -42,6 +45,7 @@ const initialState: LearningState = {
   progress: {},
   quizAnswers: [],
   lastQuizResult: null,
+  activeQuiz: null,
 };
 
 // ─── Helper ───────────────────────────────────────────────────
@@ -85,12 +89,13 @@ export const useLearningStore = create<LearningState & LearningActions>(
         };
       }),
 
-    // ── Begin a quiz attempt (clear previous answers) ───────
-    startQuiz: (_moduleId) =>
-      set({
+    // ── Begin a quiz attempt (build a fresh shuffled set) ───
+    startQuiz: (moduleId) =>
+      set((state) => ({
         quizAnswers: [],
         lastQuizResult: null,
-      }),
+        activeQuiz: buildActiveQuiz(moduleId, state.questions),
+      })),
 
     // ── Record a single answer ──────────────────────────────
     answerQuestion: (questionId, selectedIndex) =>
@@ -106,12 +111,15 @@ export const useLearningStore = create<LearningState & LearningActions>(
 
     // ── Finish & grade a quiz ───────────────────────────────
     finishQuiz: (moduleId) => {
-      const { questions, quizAnswers, progress } = get();
+      const { questions, quizAnswers, progress, activeQuiz } = get();
 
-      // 1. Get questions for this module
-      const moduleQuestions = questions.filter(
-        (q) => q.moduleId === moduleId,
-      );
+      // 1. Grade against the active (shuffled) set so option indices match
+      //    the order shown to the user. Fall back to seed questions only if
+      //    no active attempt exists (defensive).
+      const moduleQuestions =
+        activeQuiz && activeQuiz.moduleId === moduleId
+          ? activeQuiz.questions
+          : questions.filter((q) => q.moduleId === moduleId);
       const totalQuestions = moduleQuestions.length;
 
       // 2. Count correct answers

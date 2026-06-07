@@ -22,6 +22,7 @@ export default function QuizScreen() {
   const currentRole = useLearningStore((s) => s.currentRole);
   const modules = useLearningStore((s) => s.modules);
   const questions = useLearningStore((s) => s.questions);
+  const activeQuiz = useLearningStore((s) => s.activeQuiz);
   const startQuiz = useLearningStore((s) => s.startQuiz);
   const answerQuestion = useLearningStore((s) => s.answerQuestion);
   const finishQuiz = useLearningStore((s) => s.finishQuiz);
@@ -29,7 +30,14 @@ export default function QuizScreen() {
   // Find module & questions
   const moduleIdStr = typeof moduleId === 'string' ? moduleId : '';
   const module = modules.find((m) => m.id === moduleIdStr);
-  const moduleQuestions = questions.filter((q) => q.moduleId === moduleIdStr);
+
+  // Raw seed questions drive the "truly no questions" guard; the shuffled
+  // active set (built by startQuiz) is what we actually render & grade.
+  const rawModuleQuestions = questions.filter((q) => q.moduleId === moduleIdStr);
+  const moduleQuestions =
+    activeQuiz && activeQuiz.moduleId === moduleIdStr
+      ? activeQuiz.questions
+      : [];
 
   // Local state for quiz flow
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -100,8 +108,8 @@ export default function QuizScreen() {
     );
   }
 
-  // 3. Guard check if questions list is empty
-  if (moduleQuestions.length === 0) {
+  // 3. Guard check if questions list is empty (no seed questions at all)
+  if (rawModuleQuestions.length === 0) {
     return (
       <ScreenContainer style={styles.container} contentContainerStyle={styles.centerContent}>
         <AppCard style={styles.errorCard}>
@@ -123,6 +131,23 @@ export default function QuizScreen() {
             variant="primary"
             style={styles.fullWidth}
           />
+        </AppCard>
+      </ScreenContainer>
+    );
+  }
+
+  // 4. Active (shuffled) set not built yet — startQuiz runs on mount.
+  if (moduleQuestions.length === 0) {
+    return (
+      <ScreenContainer style={styles.container} contentContainerStyle={styles.centerContent}>
+        <AppCard style={styles.errorCard}>
+          <Text style={styles.errorIcon}>⏳</Text>
+          <Text style={[styles.errorTitle, { color: themeColors.text }]}>
+            Menyiapkan Kuis...
+          </Text>
+          <Text style={[styles.errorDesc, { color: themeColors.textSecondary }]}>
+            Soal sedang diacak untuk Anda.
+          </Text>
         </AppCard>
       </ScreenContainer>
     );

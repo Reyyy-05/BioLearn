@@ -203,13 +203,19 @@ export default function QuizResultScreen() {
         {/* Statistical details */}
         <View style={styles.statsGrid}>
           <View style={styles.statItem}>
-            <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Jumlah Percobaan</Text>
+            <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Mode Kuis</Text>
+            <Text style={[styles.statValue, { color: result.mode === 'exam' ? themeColors.warning : themeColors.success }]}>
+              {result.mode === 'exam' ? 'Ujian' : 'Latihan'}
+            </Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Percobaan</Text>
             <Text style={[styles.statValue, { color: themeColors.text }]}>{attempts} Kali</Text>
           </View>
           <View style={styles.statItem}>
             <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Terakhir Dikerjakan</Text>
-            <Text style={[styles.statValue, { color: themeColors.text }]}>
-              {formatStudiedDate(moduleProgress?.lastStudiedAt)}
+            <Text style={[styles.statValue, { color: themeColors.text }]} numberOfLines={1}>
+              {formatStudiedDate(moduleProgress?.lastStudiedAt).split(',')[0]}
             </Text>
           </View>
         </View>
@@ -225,6 +231,16 @@ export default function QuizResultScreen() {
         <Text style={[styles.adviceTitle, { color: themeColors.text }]}>{advice.title}</Text>
         <Text style={[styles.adviceDesc, { color: themeColors.textSecondary }]}>{advice.desc}</Text>
       </AppCard>
+
+      {/* Exam Mode Info Alert */}
+      {result.mode === 'exam' && (
+        <AppCard style={[styles.adviceCard, { borderLeftColor: themeColors.tint, backgroundColor: 'rgba(59, 130, 246, 0.05)' }]}>
+          <Text style={[styles.adviceTitle, { color: themeColors.text }]}>ℹ️ Informasi Hasil Mode Ujian</Text>
+          <Text style={[styles.adviceDesc, { color: themeColors.textSecondary }]}>
+            Pada Mode Ujian, koreksi dan penjelasan untuk masing-masing soal sengaja tidak ditampilkan selama kuis berlangsung demi melatih kemandirian belajar. Hasil evaluasi di atas adalah rangkuman dari seluruh jawaban Anda.
+          </Text>
+        </AppCard>
+      )}
 
       {/* Navigation action buttons stack */}
       <View style={styles.buttonStackContainer}>

@@ -8,6 +8,7 @@ import {
   QuizAnswer,
   QuizResult,
   ActiveQuiz,
+  QuizMode,
 } from '@/types';
 import { seedInstructors } from '@/data/seedInstructors';
 import { seedModules } from '@/data/seedModules';
@@ -30,7 +31,7 @@ interface LearningState {
 interface LearningActions {
   setRole: (role: UserRole | null) => void;
   markVideoWatched: (moduleId: string) => void;
-  startQuiz: (moduleId: string) => void;
+  startQuiz: (moduleId: string, mode?: QuizMode) => void;
   answerQuestion: (questionId: string, selectedIndex: number) => void;
   finishQuiz: (moduleId: string) => void;
   resetDemo: () => void;
@@ -90,11 +91,14 @@ export const useLearningStore = create<LearningState & LearningActions>(
       }),
 
     // ── Begin a quiz attempt (build a fresh shuffled set) ───
-    startQuiz: (moduleId) =>
+    startQuiz: (moduleId, mode = 'practice') =>
       set((state) => ({
         quizAnswers: [],
         lastQuizResult: null,
-        activeQuiz: buildActiveQuiz(moduleId, state.questions),
+        activeQuiz: {
+          ...buildActiveQuiz(moduleId, state.questions),
+          mode,
+        },
       })),
 
     // ── Record a single answer ──────────────────────────────
@@ -148,6 +152,7 @@ export const useLearningStore = create<LearningState & LearningActions>(
         score,
         passed,
         completedAt: new Date().toISOString(),
+        mode: activeQuiz?.mode || 'practice',
       };
 
       // 6. Update progress

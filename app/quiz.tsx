@@ -9,6 +9,7 @@ import AppButton from '@/components/AppButton';
 import ProgressBar from '@/components/ProgressBar';
 import DifficultyBadge from '@/components/DifficultyBadge';
 import QuizOption from '@/components/QuizOption';
+import { QuizMode } from '@/types';
 
 export default function QuizScreen() {
   const router = useRouter();
@@ -40,6 +41,7 @@ export default function QuizScreen() {
       : [];
 
   // Local state for quiz flow
+  const [selectedMode, setSelectedMode] = useState<QuizMode | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -51,11 +53,12 @@ export default function QuizScreen() {
     }
   }, [currentRole]);
 
-  // Start quiz on mount when module is valid
+  // Reset local state on mount or module change
   useEffect(() => {
-    if (module) {
-      startQuiz(module.id);
-    }
+    setSelectedMode(null);
+    setCurrentQuestionIndex(0);
+    setSelectedOptionIndex(null);
+    setShowFeedback(false);
   }, [moduleIdStr]);
 
   if (!currentRole) {
@@ -136,7 +139,80 @@ export default function QuizScreen() {
     );
   }
 
-  // 4. Active (shuffled) set not built yet — startQuiz runs on mount.
+  // 4. Mode Selection Guard
+  const handleSelectMode = (mode: QuizMode) => {
+    setSelectedMode(mode);
+    startQuiz(module.id, mode);
+  };
+
+  if (selectedMode === null) {
+    return (
+      <ScreenContainer scroll style={styles.container} contentContainerStyle={styles.centerContent}>
+        <AppCard style={styles.modeCard}>
+          <Text style={styles.modeIcon}>🧠</Text>
+          <Text style={[styles.modeTitle, { color: themeColors.text }]}>
+            Pilih Mode Kuis
+          </Text>
+          <Text style={[styles.modeDesc, { color: themeColors.textSecondary }]}>
+            Silakan pilih metode pengerjaan untuk modul:{"\n"}
+            <Text style={[styles.boldText, { color: themeColors.text }]}>{module.title}</Text>
+          </Text>
+
+          <View style={styles.modeOptionContainer}>
+            <View style={[styles.modeOptionCard, { borderColor: themeColors.border, backgroundColor: themeColors.surface }]}>
+              <View style={styles.modeHeaderRow}>
+                <Text style={styles.modeOptionEmoji}>🟢</Text>
+                <Text style={[styles.modeOptionTitle, { color: themeColors.text }]}>
+                  Mode Latihan
+                </Text>
+              </View>
+              <Text style={[styles.modeOptionDesc, { color: themeColors.textSecondary }]}>
+                Dapatkan pembahasan dan konfirmasi jawaban benar/salah secara langsung setelah setiap soal dijawab.
+              </Text>
+              <AppButton
+                title="Mulai Mode Latihan"
+                onPress={() => handleSelectMode('practice')}
+                variant="primary"
+                style={styles.modeButton}
+              />
+            </View>
+
+            <View style={[styles.modeOptionCard, { borderColor: themeColors.border, backgroundColor: themeColors.surface }]}>
+              <View style={styles.modeHeaderRow}>
+                <Text style={styles.modeOptionEmoji}>🔥</Text>
+                <Text style={[styles.modeOptionTitle, { color: themeColors.text }]}>
+                  Mode Ujian
+                </Text>
+              </View>
+              <Text style={[styles.modeOptionDesc, { color: themeColors.textSecondary }]}>
+                Uji kemampuan Anda secara mandiri. Penjelasan jawaban hanya akan ditampilkan di halaman hasil kuis.
+              </Text>
+              <AppButton
+                title="Mulai Mode Ujian"
+                onPress={() => handleSelectMode('exam')}
+                variant="secondary"
+                style={styles.modeButton}
+              />
+            </View>
+          </View>
+
+          <AppButton
+            title="Batal & Kembali"
+            onPress={() =>
+              router.replace({
+                pathname: '/module-detail' as any,
+                params: { moduleId: module.id },
+              })
+            }
+            variant="ghost"
+            style={styles.fullWidth}
+          />
+        </AppCard>
+      </ScreenContainer>
+    );
+  }
+
+  // 5. Active (shuffled) set not built yet
   if (moduleQuestions.length === 0) {
     return (
       <ScreenContainer style={styles.container} contentContainerStyle={styles.centerContent}>
@@ -179,6 +255,24 @@ export default function QuizScreen() {
       setCurrentQuestionIndex((prev) => prev + 1);
       setSelectedOptionIndex(null);
       setShowFeedback(false);
+    }
+  };
+
+  // Handle moving to next state in exam mode
+  const handleNextExam = () => {
+    if (selectedOptionIndex === null) return;
+    answerQuestion(currentQuestion.id, selectedOptionIndex);
+
+    const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
+    if (isLastQuestion) {
+      finishQuiz(module.id);
+      router.replace({
+        pathname: '/quiz-result' as any,
+        params: { moduleId: module.id },
+      });
+    } else {
+      setCurrentQuestionIndex((prev) => prev + 1);
+      setSelectedOptionIndex(null);
     }
   };
 
@@ -310,19 +404,29 @@ export default function QuizScreen() {
 
       {/* Action Buttons Footer */}
       <View style={styles.footer}>
-        {!showFeedback ? (
-          <AppButton
-            title="Cek Jawaban"
-            onPress={handleCheckAnswer}
-            variant="primary"
-            disabled={selectedOptionIndex === null}
-            style={styles.actionBtn}
-          />
+        {selectedMode === 'practice' ? (
+          !showFeedback ? (
+            <AppButton
+              title="Cek Jawaban"
+              onPress={handleCheckAnswer}
+              variant="primary"
+              disabled={selectedOptionIndex === null}
+              style={styles.actionBtn}
+            />
+          ) : (
+            <AppButton
+              title={currentQuestionIndex === totalQuestions - 1 ? 'Selesaikan Kuis' : 'Soal Berikutnya'}
+              onPress={handleNext}
+              variant="primary"
+              style={styles.actionBtn}
+            />
+          )
         ) : (
           <AppButton
-            title={currentQuestionIndex === totalQuestions - 1 ? 'Selesaikan Kuis' : 'Soal Berikutnya'}
-            onPress={handleNext}
+            title={currentQuestionIndex === totalQuestions - 1 ? 'Selesaikan Kuis' : 'Simpan & Lanjut'}
+            onPress={handleNextExam}
             variant="primary"
+            disabled={selectedOptionIndex === null}
             style={styles.actionBtn}
           />
         )}
@@ -440,5 +544,61 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     marginTop: Spacing.md,
+  },
+  modeCard: {
+    width: '100%',
+    padding: Spacing.lg,
+    gap: Spacing.md,
+    alignItems: 'center',
+  },
+  modeIcon: {
+    fontSize: 54,
+    marginBottom: Spacing.xs,
+  },
+  modeTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  modeDesc: {
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: Spacing.md,
+  },
+  modeOptionContainer: {
+    width: '100%',
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  modeOptionCard: {
+    width: '100%',
+    padding: Spacing.md,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    gap: Spacing.sm,
+  },
+  modeHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  modeOptionEmoji: {
+    fontSize: 18,
+  },
+  modeOptionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  modeOptionDesc: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  modeButton: {
+    marginTop: Spacing.xs,
+    width: '100%',
+  },
+  boldText: {
+    fontWeight: '700',
   },
 });

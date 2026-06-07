@@ -59,10 +59,13 @@ export interface QuizQuestion {
 // and correctAnswerIndex is remapped to the shuffled option order.
 export type ActiveQuizQuestion = QuizQuestion;
 
+export type QuizMode = 'practice' | 'exam';
+
 // The shuffled question set for the current quiz attempt.
 export interface ActiveQuiz {
   moduleId: string;
   questions: ActiveQuizQuestion[];
+  mode?: QuizMode;
 }
 
 export interface QuizAnswer {
@@ -77,6 +80,7 @@ export interface QuizResult {
   score: number; // 0–100
   passed: boolean; // score >= 70
   completedAt: string; // ISO date
+  mode?: QuizMode;
 }
 
 // ─── Progress ─────────────────────────────────────────────────

@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, useColorScheme } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Colors, Spacing, Radius } from '@/constants/theme';
-import { useLearningStore } from '@/store/useLearningStore';
-import ScreenContainer from '@/components/ScreenContainer';
-import AppCard from '@/components/AppCard';
 import AppButton from '@/components/AppButton';
-import ProgressBar from '@/components/ProgressBar';
+import AppCard from '@/components/AppCard';
 import DifficultyBadge from '@/components/DifficultyBadge';
+import ProgressBar from '@/components/ProgressBar';
+import ScreenContainer from '@/components/ScreenContainer';
+import { Colors, Radius, Spacing } from '@/constants/theme';
+import { useLearningStore } from '@/store/useLearningStore';
+import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
+import { StyleSheet, Text, View, useColorScheme } from 'react-native';
 
 export default function ProgressScreen() {
   const router = useRouter();

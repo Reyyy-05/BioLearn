@@ -1,119 +1,80 @@
-# 🧠 Brainstorming BioLearn
 
-> Dokumen ide pengembangan lanjutan. Tujuannya menampung gagasan fitur, lalu menyaringnya berdasarkan **nilai untuk siswa** vs **biaya implementasi**, dengan tetap menghormati batasan demo: **100% offline, tanpa database eksternal, state via Zustand, kompatibel Expo Go SDK 54**.
+You are a Senior Product Manager, EdTech Strategist, and Technical Product Architect.
 
----
+I am building a mobile app called BioLearn.
 
-## 1. Konteks Singkat
-- **Status:** MVP selesai (login peran, dashboard siswa, modul, detail + mock video, kuis, hasil, progress, reset demo).
-- **Pengguna:** Siswa SMA kelas 10–12, persiapan ujian & seleksi kuliah.
-- **Filosofi:** Belajar efisien, evaluasi cerdas (KKM 70), rekomendasi adaptif.
-- **Batasan keras:** Demo presentasi klien harus mulus tanpa jaringan/backend.
+Current status:
+BioLearn MVP v0.1 is already completed. It is built with Expo React Native, TypeScript, Expo Router, Zustand, local dummy data, and no backend. The current MVP flow works end-to-end:
 
----
+Role Login → Student Dashboard → Biology Module List → Module Detail → Mock Video Lesson → Material Summary → Interactive Quiz → Quiz Result → Learning Progress.
 
-## 2. Kumpulan Ide (Divergen)
+Product concept:
+BioLearn is a Biology learning app for Indonesian high school students, especially grades 10–12. It is inspired by video-based learning platforms, but focused only on Biology.
 
-### 🎓 Pengalaman Belajar Siswa
-- **Flashcard istilah biologi** per bab (tap untuk balik kartu), bagus untuk hafalan cepat.
-- **Mode "Belajar Kilat 5 menit"**: 1 ringkasan + 3 soal acak, untuk sesi belajar singkat.
-- **Glosarium biologi** yang dapat dicari (sel, mitosis, fotosintesis, dll).
-- **Bookmark/Simpan ringkasan** favorit agar mudah ditinjau ulang.
-- **Catatan pribadi** per modul (teks bebas, disimpan di store).
-- **Highlight poin kunci** pada ringkasan materi.
+Unique angle:
+BioLearn may involve a young Biology mentor: a grade 11 science student who likes Biology and can become the video presenter, private learning mentor, and content creator for Biology lessons.
 
-### 📝 Kuis & Evaluasi
-- **Bank soal lebih besar + pengacakan** soal dan urutan opsi tiap percobaan.
-- **Mode latihan vs mode ujian** (latihan: feedback instan; ujian: feedback di akhir + timer).
-- **Timer kuis** opsional untuk simulasi ujian sungguhan.
-- **Riwayat percobaan kuis** per bab (skor tertinggi, tren naik/turun).
-- **Tipe soal baru**: benar/salah, isian singkat, mencocokkan (matching).
-- **Pembahasan video pendek** yang tertaut langsung ke soal yang salah.
+My role:
+I am a 6th-semester Informatics student building BioLearn as a portfolio, product development project, and possible capstone/thesis foundation.
 
-### 🧭 Rekomendasi Adaptif (penguatan diferensiasi produk)
-- **Skor "kesiapan ujian" per kelas** (gabungan progress video + rata-rata kuis).
-- **Daftar remedial cerdas**: urutkan bab di bawah KKM berdasarkan jarak ke 70.
-- **"Lanjutkan dari terakhir"**: deep-link ke modul/video yang belum selesai.
-- **Saran bab berikutnya** berbasis prasyarat (mis. Sel → Jaringan → Organ).
+Your task:
+Help me turn this MVP into a clearer product plan and PRD for BioLearn v0.2.
 
-### 🏆 Motivasi & Retensi
-- **Streak belajar harian** (mock, berbasis tanggal di store).
-- **Badge pencapaian**: "Tuntas Kelas 10", "Nilai Sempurna", "5 Hari Beruntun".
-- **Progress ring** animatif di dashboard (reanimated sudah tersedia).
-- **Pesan selamat** kontekstual saat lulus KKM.
+Please produce a practical, structured, implementation-ready analysis covering:
 
-### 👨‍🏫 Peran Guru & Admin (saat ini masih dummy)
-- **Dashboard Guru**: ringkasan progress kelas (data seed/mock siswa).
-- **Admin Konten**: form tambah/edit modul & soal (in-memory, reset saat restart).
-- **Pratinjau "sebagai siswa"** dari akun guru.
+1. Strongest product positioning for BioLearn.
+2. Primary and secondary target users.
+3. User personas:
 
-### 🎨 UI/UX & Polish
-- **Animasi transisi antar halaman** (Roadmap v0.2) via reanimated/expo-router.
-- **Skeleton loading** singkat untuk kesan responsif premium.
-- **Dark mode** penuh (tema adaptif sudah ada fondasinya).
-- **Haptics** pada aksi penting (expo-haptics sudah terpasang): jawab benar/salah, lulus kuis.
-- **Empty states** yang ramah saat progress masih kosong.
+   * high school Biology learner
+   * young Biology mentor/content creator
+   * Informatics student/developer-owner
+4. Sharp problem statement.
+5. Value proposition.
+6. Jobs To Be Done for students and mentors.
+7. Use cases:
 
-### ♿ Aksesibilitas & Lokalisasi
-- **Ukuran font yang dapat diperbesar** + label aksesibilitas pada tombol/opsi.
-- **Kontras warna** memenuhi standar dasar WCAG.
-- Konten tetap **Bahasa Indonesia**; siapkan struktur i18n bila perlu EN nanti.
+   * self-paced Biology learning
+   * private tutoring support
+   * mentor-led video content
+8. Recommended v0.2 feature scope.
+9. Features to explicitly postpone to avoid scope creep.
+10. Impact vs effort prioritization.
+11. Complete PRD v0.2:
 
----
+* background
+* goals
+* non-goals
+* target users
+* user stories
+* functional requirements
+* acceptance criteria
+* success metrics
+* risks
+* roadmap
 
-## 3. Penyaringan (Konvergen) — Matriks Dampak vs Usaha
+12. Recommended Biology video content format:
 
-| Ide | Dampak Belajar | Usaha | Risiko Demo | Prioritas |
-|---|---|---|---|---|
-| Pengacakan soal + bank lebih besar | Tinggi | Rendah | Rendah | **P0** |
-| Mode latihan vs ujian + timer | Tinggi | Sedang | Rendah | **P0** |
-| Riwayat percobaan kuis | Sedang | Rendah | Rendah | **P1** |
-| Streak + badge pencapaian | Sedang | Rendah | Rendah | **P1** |
-| Flashcard / Belajar Kilat | Tinggi | Sedang | Rendah | **P1** |
-| Skor kesiapan ujian + remedial cerdas | Tinggi | Sedang | Rendah | **P1** |
-| Animasi transisi + haptics + progress ring | Sedang | Rendah | Rendah | **P1** |
-| Catatan & bookmark | Sedang | Rendah | Rendah | **P2** |
-| Dashboard Guru (mock) | Tinggi | Tinggi | Sedang | **P2** |
-| Admin Konten (CRUD in-memory) | Sedang | Tinggi | Sedang | **P3** |
-| Dark mode penuh | Rendah | Sedang | Rendah | **P3** |
+* ideal duration
+* script structure
+* teaching style
+* video template
+* connection between video, summary, quiz, and progress
 
-> P0 = kandidat berikutnya yang paling untung secara biaya/manfaat dan paling aman untuk demo.
+13. Collaboration workflow between:
 
----
+* Informatics student as developer/product owner
+* grade 11 science student as Biology mentor/presenter
 
-## 4. Rekomendasi Iterasi Berikutnya (v0.2 — "Evaluasi Lebih Tajam")
-Fokus memperkuat pembeda utama produk (evaluasi & rekomendasi) tanpa keluar dari batasan offline:
+14. Realistic long-term monetization ideas, but keep them out of the MVP.
+15. Recommended technical next steps after MVP v0.1.
 
-1. **Pengacakan soal & opsi** + perbesar bank soal di `data/seedQuestions.ts`.
-2. **Mode latihan vs ujian** dengan **timer** opsional di `app/quiz.tsx`.
-3. **Riwayat & skor tertinggi per bab** di `store/useLearningStore.ts`, ditampilkan di `app/progress.tsx`.
-4. **Skor kesiapan ujian** + **daftar remedial cerdas** (urut jarak ke KKM 70) di dashboard.
-5. **Polish demo**: animasi transisi halaman, progress ring animatif, haptics jawaban benar/salah.
+Important constraints:
 
-**Kriteria selesai:** `npx tsc --noEmit` bersih, `npx expo install --check` selaras SDK 54, alur demo di README tetap mulus, tombol **Reset Demo** mengembalikan semua state baru ke kondisi awal.
-
----
-
-## 5. Catatan Teknis & Batasan
-- **Tetap offline**: semua data dari `data/seed*.ts`; tanpa SQLite/Supabase/Firebase/AsyncStorage selama fase demo.
-- **State efemeral**: progress hidup di Zustand dan **hilang saat app ditutup** — ini sesuai kebutuhan demo berulang. Persistensi (`AsyncStorage`) ditunda ke Roadmap v0.3.
-- **Reset Demo** wajib mengosongkan **semua** field state baru agar presentasi dapat diulang bersih.
-- **Mock video** memakai `expo-video`; hindari ketergantungan jaringan untuk aset (pakai aset lokal/placeholder).
-- **Typed routes** Expo Router aktif — perbarui tipe rute saat menambah halaman.
-
----
-
-## 6. Pertanyaan Terbuka (perlu keputusan)
-- Apakah perlu **persistensi ringan** lebih awal (mis. hanya streak), atau tetap 100% efemeral sampai v0.3?
-- Berapa **jumlah soal ideal** per bab untuk demo (cukup 3, atau perbanyak agar pengacakan terasa)?
-- Apakah **Dashboard Guru** masuk lingkup demo klien berikutnya, atau tetap dummy dulu?
-- Perlukah **timer kuis** ditampilkan saat demo, atau hanya tersedia sebagai opsi?
-
----
-
-## 7. Ide "Suatu Saat" (Parkir)
-- Sinkronisasi cloud & multi-user riil (Roadmap v1.0).
-- AI Tutor & adaptive learning berbasis pola kesalahan (Roadmap v2.0).
-- Leaderboard antar siswa, mode kompetisi kelas.
-- Ekspor rapor progress ke PDF.
-- Notifikasi pengingat belajar (butuh keluar dari Expo Go murni).
+* Do not suggest backend for v0.2 unless strongly justified.
+* Do not suggest AI tutor yet.
+* Do not suggest payment, leaderboard, or school dashboard yet.
+* Keep v0.2 achievable by one developer in 1–2 weeks.
+* Prefer features that improve learning value and portfolio quality.
+* Be critical. If an idea is too broad, cut it down.
+* Output should be practical enough to become a development roadmap.

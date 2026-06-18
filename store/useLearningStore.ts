@@ -7,6 +7,7 @@ import {
   LearningProgress,
   QuizAnswer,
   QuizResult,
+  QuizAttempt,
   ActiveQuiz,
   QuizMode,
 } from '@/types';
@@ -25,6 +26,7 @@ interface LearningState {
   quizAnswers: QuizAnswer[];
   lastQuizResult: QuizResult | null;
   activeQuiz: ActiveQuiz | null;
+  quizAttempts: QuizAttempt[];
 }
 
 // ─── Actions ──────────────────────────────────────────────────
@@ -47,6 +49,7 @@ const initialState: LearningState = {
   quizAnswers: [],
   lastQuizResult: null,
   activeQuiz: null,
+  quizAttempts: [],
 };
 
 // ─── Helper ───────────────────────────────────────────────────
@@ -165,13 +168,26 @@ export const useLearningStore = create<LearningState & LearningActions>(
         lastStudiedAt: new Date().toISOString(),
       };
 
-      set({
+      // 7. Build attempt record
+      const attempt: QuizAttempt = {
+        id: `attempt-${Date.now()}`,
+        moduleId,
+        mode: quizResult.mode ?? 'practice',
+        score: quizResult.score,
+        correctCount: quizResult.correctCount,
+        totalQuestions: quizResult.totalQuestions,
+        passed: quizResult.passed,
+        completedAt: quizResult.completedAt,
+      };
+
+      set((state) => ({
         lastQuizResult: quizResult,
         progress: {
-          ...progress,
+          ...state.progress,
           [moduleId]: updatedProgress,
         },
-      });
+        quizAttempts: [...state.quizAttempts, attempt],
+      }));
     },
 
     // ── Reset all data to initial state ─────────────────────

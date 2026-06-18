@@ -21,6 +21,7 @@ export default function QuizResultScreen() {
   const modules = useLearningStore((s) => s.modules);
   const progress = useLearningStore((s) => s.progress);
   const lastQuizResult = useLearningStore((s) => s.lastQuizResult);
+  const quizAttempts = useLearningStore((s) => s.quizAttempts);
 
   // Security guard
   useEffect(() => {
@@ -110,6 +111,16 @@ export default function QuizResultScreen() {
   const attempts = moduleProgress?.attempts ?? 1;
   const isVideoWatched = moduleProgress?.videoWatched ?? false;
 
+  // Attempt history for this module (newest first)
+  const moduleAttempts = quizAttempts
+    .filter((a) => a.moduleId === module.id)
+    .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
+  const bestScore = moduleAttempts.length > 0 ? Math.max(...moduleAttempts.map((a) => a.score)) : score;
+  const attemptNumber = moduleAttempts.length || 1;
+  const previousAttempt = moduleAttempts.length >= 2 ? moduleAttempts[1] : null;
+  const scoreDelta = previousAttempt ? score - previousAttempt.score : null;
+  const recentAttempts = moduleAttempts.slice(0, 3);
+
   // Format study timestamp safely
   const formatStudiedDate = (isoString: string | null | undefined): string => {
     if (!isoString) return '-';
@@ -198,6 +209,20 @@ export default function QuizResultScreen() {
           </View>
         </View>
 
+        {/* Score delta indicator */}
+        {scoreDelta !== null && (
+          <View style={styles.deltaRow}>
+            <Text
+              style={[
+                styles.deltaText,
+                { color: scoreDelta > 0 ? themeColors.success : scoreDelta < 0 ? themeColors.error : themeColors.textSecondary },
+              ]}
+            >
+              {scoreDelta > 0 ? `▲ +${scoreDelta}` : scoreDelta < 0 ? `▼ ${scoreDelta}` : '= Sama'} dari percobaan sebelumnya
+            </Text>
+          </View>
+        )}
+
         <View style={[styles.divider, { backgroundColor: themeColors.border }]} />
 
         {/* Statistical details */}
@@ -210,12 +235,12 @@ export default function QuizResultScreen() {
           </View>
           <View style={styles.statItem}>
             <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Percobaan</Text>
-            <Text style={[styles.statValue, { color: themeColors.text }]}>{attempts} Kali</Text>
+            <Text style={[styles.statValue, { color: themeColors.text }]}>Ke-{attemptNumber}</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Terakhir Dikerjakan</Text>
-            <Text style={[styles.statValue, { color: themeColors.text }]} numberOfLines={1}>
-              {formatStudiedDate(moduleProgress?.lastStudiedAt).split(',')[0]}
+            <Text style={[styles.statLabel, { color: themeColors.textSecondary }]}>Nilai Terbaik</Text>
+            <Text style={[styles.statValue, { color: bestScore >= 70 ? themeColors.success : themeColors.error }]}>
+              {bestScore}
             </Text>
           </View>
         </View>
@@ -241,6 +266,63 @@ export default function QuizResultScreen() {
           </Text>
         </AppCard>
       )}
+
+      {/* Attempt History Card */}
+      <AppCard style={styles.historyCard}>
+        <Text style={[styles.historyTitle, { color: themeColors.text }]}>📊 Riwayat Percobaan</Text>
+        {recentAttempts.length > 1 ? (
+          <View style={styles.historyList}>
+            {recentAttempts.map((attempt, index) => (
+              <View
+                key={attempt.id}
+                style={[
+                  styles.historyItem,
+                  index < recentAttempts.length - 1 && { borderBottomWidth: 1, borderBottomColor: themeColors.border },
+                ]}
+              >
+                <View style={styles.historyItemLeft}>
+                  <Text
+                    style={[
+                      styles.historyModeBadge,
+                      {
+                        color: attempt.mode === 'exam' ? themeColors.warning : themeColors.tint,
+                        backgroundColor: attempt.mode === 'exam' ? 'rgba(245,158,11,0.1)' : 'rgba(22,163,74,0.1)',
+                      },
+                    ]}
+                  >
+                    {attempt.mode === 'exam' ? 'Ujian' : 'Latihan'}
+                  </Text>
+                  <Text style={[styles.historyDate, { color: themeColors.textSecondary }]}>
+                    {formatStudiedDate(attempt.completedAt)}
+                  </Text>
+                </View>
+                <View style={styles.historyItemRight}>
+                  <Text
+                    style={[
+                      styles.historyScore,
+                      { color: attempt.passed ? themeColors.success : themeColors.error },
+                    ]}
+                  >
+                    {attempt.score}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.historyStatus,
+                      { color: attempt.passed ? themeColors.success : themeColors.error },
+                    ]}
+                  >
+                    {attempt.passed ? '✓ Lulus' : '✗ Perlu Ulang'}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <Text style={[styles.historyEmpty, { color: themeColors.textSecondary }]}>
+            Ini adalah percobaan pertama Anda untuk modul ini. Riwayat akan muncul setelah percobaan berikutnya.
+          </Text>
+        )}
+      </AppCard>
 
       {/* Navigation action buttons stack */}
       <View style={styles.buttonStackContainer}>
@@ -283,7 +365,7 @@ export default function QuizResultScreen() {
       </View>
 
       <Text style={[styles.footerText, { color: themeColors.textSecondary }]}>
-        BioLearn Demo Checklist • Checkpoint 10 (Final MVP)
+        BioLearn v0.2 • CP-C (Attempt History + Best Score)
       </Text>
     </ScreenContainer>
   );
@@ -444,5 +526,64 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     marginTop: Spacing.md,
+  },
+  deltaRow: {
+    alignItems: 'center',
+    paddingTop: Spacing.xs,
+  },
+  deltaText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  historyCard: {
+    gap: Spacing.sm,
+    padding: Spacing.lg,
+  },
+  historyTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  historyList: {
+    gap: 0,
+  },
+  historyItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+  },
+  historyItemLeft: {
+    gap: 2,
+  },
+  historyModeBadge: {
+    fontSize: 11,
+    fontWeight: '700',
+    paddingVertical: 2,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: Radius.sm,
+    overflow: 'hidden',
+    alignSelf: 'flex-start',
+  },
+  historyDate: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  historyItemRight: {
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  historyScore: {
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  historyStatus: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  historyEmpty: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
   },
 });

@@ -19,6 +19,7 @@ export default function ProgressScreen() {
   const modules = useLearningStore((s) => s.modules);
   const instructors = useLearningStore((s) => s.instructors);
   const progress = useLearningStore((s) => s.progress);
+  const quizAttempts = useLearningStore((s) => s.quizAttempts);
 
   // Security guard
   useEffect(() => {
@@ -94,6 +95,33 @@ export default function ProgressScreen() {
     if (lower.includes('sistem') || lower.includes('pencernaan') || lower.includes('pernapasan') || lower.includes('ekskresi')) return '🫁';
     return '📖';
   };
+
+  // Format date helper
+  const formatDate = (isoString: string): string => {
+    try {
+      const date = new Date(isoString);
+      return date.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return '-';
+    }
+  };
+
+  // Best score helper for a module
+  const getModuleBestScore = (moduleId: string): number | null => {
+    const moduleAttempts = quizAttempts.filter((a) => a.moduleId === moduleId);
+    if (moduleAttempts.length === 0) return null;
+    return Math.max(...moduleAttempts.map((a) => a.score));
+  };
+
+  // Recent attempts across all modules (newest first, max 5)
+  const recentAttempts = [...quizAttempts]
+    .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())
+    .slice(0, 5);
 
   // --- TOPIC TO REVIEW LOGIC ---
   const topicsToReview = [...lowScoreModules, ...unwatchedVideoModules.filter(m => !lowScoreModules.find(l => l.id === m.id))];
@@ -344,7 +372,7 @@ export default function ProgressScreen() {
 
                 {/* Quiz score indicator */}
                 <View style={[styles.scoreBox, { backgroundColor: themeColors.border }]}>
-                  <Text style={[styles.scoreBoxLabel, { color: themeColors.text }]}>Skor Kuis:</Text>
+                  <Text style={[styles.scoreBoxLabel, { color: themeColors.text }]}>Skor Terakhir:</Text>
                   {lastScore !== null && lastScore !== undefined ? (
                     <Text
                       style={[
@@ -360,6 +388,24 @@ export default function ProgressScreen() {
                     </Text>
                   )}
                 </View>
+
+                {/* Best score indicator */}
+                {(() => {
+                  const best = getModuleBestScore(module.id);
+                  return best !== null ? (
+                    <View style={[styles.scoreBox, { backgroundColor: themeColors.border }]}>
+                      <Text style={[styles.scoreBoxLabel, { color: themeColors.text }]}>Nilai Terbaik:</Text>
+                      <Text
+                        style={[
+                          styles.scoreBoxVal,
+                          { color: best >= 70 ? themeColors.success : themeColors.error },
+                        ]}
+                      >
+                        {best} / 100
+                      </Text>
+                    </View>
+                  ) : null;
+                })()}
 
                 {/* Card Actions */}
                 <View style={styles.cardActionsRow}>
@@ -394,6 +440,78 @@ export default function ProgressScreen() {
         </View>
       </View>
 
+      {/* Recent Attempt History Section */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>📜 Riwayat Latihan Terbaru</Text>
+        {recentAttempts.length > 0 ? (
+          <AppCard style={styles.recentHistoryCard}>
+            {recentAttempts.map((attempt, index) => {
+              const attemptModule = modules.find((m) => m.id === attempt.moduleId);
+              return (
+                <View
+                  key={attempt.id}
+                  style={[
+                    styles.recentItem,
+                    index < recentAttempts.length - 1 && { borderBottomWidth: 1, borderBottomColor: themeColors.border },
+                  ]}
+                >
+                  <View style={styles.recentItemTop}>
+                    <Text style={[styles.recentModuleTitle, { color: themeColors.text }]} numberOfLines={1}>
+                      {getModuleEmoji(attemptModule?.title || '')} {attemptModule?.title || 'Modul'}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.recentScore,
+                        { color: attempt.passed ? themeColors.success : themeColors.error },
+                      ]}
+                    >
+                      {attempt.score}
+                    </Text>
+                  </View>
+                  <View style={styles.recentItemBottom}>
+                    <View style={styles.recentMeta}>
+                      <Text
+                        style={[
+                          styles.recentModeBadge,
+                          {
+                            color: attempt.mode === 'exam' ? themeColors.warning : themeColors.tint,
+                            backgroundColor: attempt.mode === 'exam' ? 'rgba(245,158,11,0.1)' : 'rgba(22,163,74,0.1)',
+                          },
+                        ]}
+                      >
+                        {attempt.mode === 'exam' ? 'Ujian' : 'Latihan'}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.recentStatusBadge,
+                          {
+                            color: attempt.passed ? themeColors.success : themeColors.error,
+                            backgroundColor: attempt.passed ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+                          },
+                        ]}
+                      >
+                        {attempt.passed ? '✓ Lulus' : '✗ Perlu Ulang'}
+                      </Text>
+                    </View>
+                    <Text style={[styles.recentDate, { color: themeColors.textSecondary }]}>
+                      {formatDate(attempt.completedAt)}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </AppCard>
+        ) : (
+          <AppCard style={styles.completedAllCard}>
+            <Text style={styles.trophyIcon}>📝</Text>
+            <Text style={[styles.completedTitle, { color: themeColors.text }]}>Belum Ada Riwayat</Text>
+            <Text style={[styles.completedDesc, { color: themeColors.textSecondary }]}>
+              Selesaikan kuis pertama Anda untuk melihat riwayat latihan di sini.
+            </Text>
+          </AppCard>
+        )}
+      </View>
+
       {/* Navigation Footer Actions */}
       <View style={styles.footerNavActions}>
         <AppButton
@@ -411,7 +529,7 @@ export default function ProgressScreen() {
       </View>
 
       <Text style={[styles.footerText, { color: themeColors.textSecondary }]}>
-        BioLearn Demo Checklist • Checkpoint 10 (Final MVP)
+        BioLearn v0.2 • CP-C (Attempt History + Best Score)
       </Text>
     </ScreenContainer>
   );
@@ -700,5 +818,57 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     marginTop: Spacing.md,
+  },
+  recentHistoryCard: {
+    padding: Spacing.md,
+    gap: 0,
+  },
+  recentItem: {
+    paddingVertical: Spacing.sm,
+    gap: 4,
+  },
+  recentItemTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  recentModuleTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    flex: 1,
+    marginRight: Spacing.sm,
+  },
+  recentScore: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  recentItemBottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  recentMeta: {
+    flexDirection: 'row',
+    gap: Spacing.xs,
+  },
+  recentModeBadge: {
+    fontSize: 10,
+    fontWeight: '700',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: Radius.sm,
+    overflow: 'hidden',
+  },
+  recentStatusBadge: {
+    fontSize: 10,
+    fontWeight: '700',
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: Radius.sm,
+    overflow: 'hidden',
+  },
+  recentDate: {
+    fontSize: 11,
+    fontWeight: '500',
   },
 });

@@ -83,6 +83,18 @@ export interface QuizResult {
   mode?: QuizMode;
 }
 
+// ─── Attempt History ──────────────────────────────────────────
+export interface QuizAttempt {
+  id: string;
+  moduleId: string;
+  mode: QuizMode;
+  score: number;
+  correctCount: number;
+  totalQuestions: number;
+  passed: boolean;
+  completedAt: string; // ISO date
+}
+
 // ─── Progress ─────────────────────────────────────────────────
 export interface LearningProgress {
   moduleId: string;

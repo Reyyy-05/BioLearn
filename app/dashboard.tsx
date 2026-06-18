@@ -21,6 +21,7 @@ export default function DashboardScreen() {
   const instructors = useLearningStore((s) => s.instructors);
   const questions = useLearningStore((s) => s.questions);
   const progress = useLearningStore((s) => s.progress);
+  const quizAttempts = useLearningStore((s) => s.quizAttempts);
   const resetDemo = useLearningStore((s) => s.resetDemo);
 
   // Security check: Redirect back to Login if currentRole is null
@@ -256,6 +257,18 @@ export default function DashboardScreen() {
                     <Text style={[styles.scoreStatus, { color: latestProgressScore.lastScore! >= 70 ? themeColors.success : themeColors.error }]}>
                       {latestProgressScore.lastScore! >= 70 ? '🟢 LULUS (KKM 70)' : '🔴 BELUM LULUS'}
                     </Text>
+                    {(() => {
+                      const moduleAttempts = quizAttempts.filter(
+                        (a) => a.moduleId === latestProgressScore.moduleId,
+                      );
+                      if (moduleAttempts.length === 0) return null;
+                      const best = Math.max(...moduleAttempts.map((a) => a.score));
+                      return (
+                        <Text style={[styles.scoreBestLine, { color: themeColors.textSecondary }]}>
+                          Nilai Terbaik: <Text style={{ fontWeight: '800', color: best >= 70 ? themeColors.success : themeColors.error }}>{best}</Text>
+                        </Text>
+                      );
+                    })()}
                   </View>
                 </View>
               ) : (
@@ -547,6 +560,11 @@ const styles = StyleSheet.create({
   scoreStatus: {
     fontSize: 12,
     fontWeight: '700',
+  },
+  scoreBestLine: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 2,
   },
   noScoreContent: {
     flexDirection: 'row',
